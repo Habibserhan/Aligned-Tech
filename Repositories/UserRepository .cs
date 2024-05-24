@@ -18,6 +18,11 @@ namespace Aligned.Repositories
 
         public void CreateUser(User user)
         {
+            if (!Helper.IsPasswordComplex(user.Password))
+            {
+                throw new ArgumentException("Password does not meet complexity requirements.");
+            }
+
             byte[] encryptedPassword = Helper.EncryptStringToBytes_Aes(user.Password);
 
             try
@@ -40,6 +45,41 @@ namespace Aligned.Repositories
             catch (SqlException ex)
             {
                 if (ex.Number == 50000 && ex.Message.Contains("Email already exists"))
+                {
+                    throw new Exception("Email already exists. Please use a different email.");
+                }
+                throw;
+            }
+        }
+        public void UpdateUser(User user)
+        {
+            if (!Helper.IsPasswordComplex(user.Password))
+            {
+                throw new ArgumentException("Password does not meet complexity requirements.");
+            }
+
+            byte[] encryptedPassword = Helper.EncryptStringToBytes_Aes(user.Password);
+
+            try
+            {
+                using (SqlCommand command = new SqlCommand("SP_UpdateUser", _connection))
+                {
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    command.Parameters.AddWithValue("@Id", user.Id);
+                    command.Parameters.AddWithValue("@Email", user.Email);
+                    command.Parameters.AddWithValue("@FullName", user.FullName);
+                    command.Parameters.AddWithValue("@Password", encryptedPassword);
+                    command.Parameters.AddWithValue("@Active", user.Active);
+
+                    _connection.Open();
+                    command.ExecuteNonQuery();
+                    _connection.Close();
+                }
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("The email address is already in use by another user."))
                 {
                     throw new Exception("Email already exists. Please use a different email.");
                 }
@@ -112,37 +152,6 @@ namespace Aligned.Repositories
             }
 
             return user;
-        }
-
-        public void UpdateUser(User user)
-        {
-            byte[] encryptedPassword = Helper.EncryptStringToBytes_Aes(user.Password);
-
-            try
-            {
-                using (SqlCommand command = new SqlCommand("SP_UpdateUser", _connection))
-                {
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
-
-                    command.Parameters.AddWithValue("@Id", user.Id);
-                    command.Parameters.AddWithValue("@Email", user.Email);
-                    command.Parameters.AddWithValue("@FullName", user.FullName);
-                    command.Parameters.AddWithValue("@Password", encryptedPassword);
-                    command.Parameters.AddWithValue("@Active", user.Active);
-
-                    _connection.Open();
-                    command.ExecuteNonQuery();
-                    _connection.Close();
-                }
-            }
-            catch (SqlException ex)
-            {
-                if (ex.Message.Contains("The email address is already in use by another user."))
-                {
-                    throw new Exception("Email already exists. Please use a different email.");
-                }
-                throw;
-            }
         }
 
         public List<string> GetUserRoles(Guid userId)

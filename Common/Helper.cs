@@ -12,30 +12,54 @@ using System.Data.SqlClient;
 using Aligned.Models;
 using System.Data.Common;
 using System.Data;
+using System.Text.RegularExpressions;
 
 public static class Helper
 {
     private static readonly byte[] Key = Encoding.UTF8.GetBytes("8A*?dFj3Yz<zN4&2!Z7@^1qM5gR^B2Fs");
     private static readonly byte[] IV = Encoding.UTF8.GetBytes("9D7f^C3!#@6aQw2*");
-    
+    public static bool IsPasswordComplex(string password)
+    {
+        // Define the password complexity rules
+        var hasMinimumLength = new Regex(@".{8,}"); // At least 8 characters
+        var hasUpperCaseLetter = new Regex(@"[A-Z]+"); // At least one uppercase letter
+        var hasLowerCaseLetter = new Regex(@"[a-z]+"); // At least one lowercase letter
+        var hasDecimalDigit = new Regex(@"[0-9]+"); // At least one digit
+        var hasSpecialCharacter = new Regex(@"[!@#$%^&*(),.?\\\"":{}|<>]+");
+
+        var isValid = hasMinimumLength.IsMatch(password) &&
+                      hasUpperCaseLetter.IsMatch(password) &&
+                      hasLowerCaseLetter.IsMatch(password) &&
+                      hasDecimalDigit.IsMatch(password) &&
+                      hasSpecialCharacter.IsMatch(password);
+
+        return isValid;
+    }
+
     public static string GetClientIpAddress(HttpContext context)
     {
+        string ipAddress = context.Connection.RemoteIpAddress?.ToString();
+
         if (context.Request.Headers.ContainsKey("X-Forwarded-For"))
         {
-            string forwardedIp = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(forwardedIp))
-            {
-                return forwardedIp.Split(',').FirstOrDefault();
-            }
+            ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
         }
-
-        var remoteIpAddress = context.Connection.RemoteIpAddress;
-        if (remoteIpAddress != null)
+        else if (context.Request.Headers.ContainsKey("X-Real-IP"))
         {
-            return remoteIpAddress.MapToIPv4().ToString();
+            ipAddress = context.Request.Headers["X-Real-IP"];
         }
 
-        return "0.0.0.0";
+        if (string.IsNullOrEmpty(ipAddress) || ipAddress == "::1")
+        {
+            ipAddress = context.Connection.RemoteIpAddress?.MapToIPv4().ToString();
+        }
+
+        if (string.IsNullOrEmpty(ipAddress))
+        {
+            ipAddress = "0.0.0.0";
+        }
+
+        return ipAddress;
     }
 
     public static byte[] EncryptStringToBytes_Aes(string plainText)
@@ -172,7 +196,7 @@ public static class Helper
                         CanImport = Convert.ToBoolean(reader["CanImport"]),
                         CanExport = Convert.ToBoolean(reader["CanExport"])
                     };
-                    permission.Visible = permission.CanAdd || permission.CanEdit || permission.CanDelete || permission.CanView || permission.CanList || permission.CanImport || permission.CanExport;
+                    permission.HasAccess = permission.CanAdd || permission.CanEdit || permission.CanDelete || permission.CanView || permission.CanList || permission.CanImport || permission.CanExport;
                     permissions.Add(permission);
                 }
             }

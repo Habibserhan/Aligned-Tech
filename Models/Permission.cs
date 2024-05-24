@@ -10,7 +10,7 @@
         public bool CanList { get; set; }
         public bool CanImport { get; set; }
         public bool CanExport { get; set; }
-        public bool Visible { get; set; } 
+        public bool HasAccess { get; set; } 
     }
 
 }

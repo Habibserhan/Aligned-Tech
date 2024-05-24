@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Aligned")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a28e8bbe597563b11ed6d3d8d204d526f42780fd")]
 [assembly: System.Reflection.AssemblyProductAttribute("Aligned")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Aligned")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
