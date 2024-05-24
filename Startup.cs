@@ -53,6 +53,7 @@ public class Startup : Initiate
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IJwtSettingsRepository, JwtSettingsRepository>();
         services.AddScoped<IUserTokenRepository, UserTokenRepository>();
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
 
         // Configure Swagger
         services.AddSwaggerGen(c =>
