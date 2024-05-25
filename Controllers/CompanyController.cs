@@ -25,20 +25,12 @@ namespace Aligned.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] CompanyCreateDto companyDto)
         {
-           
+
             string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
-            if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
+            var result = Helper.ValidateTokenAndPermission(_connection, token, "Company", "CanAdd", HttpContext);
+            if (result != null)
             {
-                return Helper.UnauthorizedResponse();
-
-
-            }
-
-            var userId = Helper.GetUserIdFromToken(token);
-
-            if (!Helper.HasPermission(_connection, userId, "Company", "CanAdd"))
-            {
-                return Helper.ForbiddenResponse();
+                return result;
             }
 
             try
@@ -70,18 +62,12 @@ namespace Aligned.Controllers
         public async Task<IActionResult> Update([FromBody] CompanyUpdateDto companyDto)
         {
             string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
-            if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
+            var result = Helper.ValidateTokenAndPermission(_connection, token, "Company", "CanEdit", HttpContext);
+            if (result != null)
             {
-                return Helper.UnauthorizedResponse(); ;
+                return result;
             }
 
-            var userId = Helper.GetUserIdFromToken(token);
-
-            if (!Helper.HasPermission(_connection, userId, "Company", "CanEdit"))
-            {
-
-                return Helper.ForbiddenResponse();
-            }
 
             try
             {
@@ -112,16 +98,10 @@ namespace Aligned.Controllers
         public async Task<IActionResult> Delete([FromBody] Guid id)
         {
             string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
-            if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
+            var result = Helper.ValidateTokenAndPermission(_connection, token, "Company", "CanDelete", HttpContext);
+            if (result != null)
             {
-                return Helper.UnauthorizedResponse();
-            }
-
-            var userId = Helper.GetUserIdFromToken(token);
-
-            if (!Helper.HasPermission(_connection, userId, "Company", "CanDelete"))
-            {
-                return Helper.ForbiddenResponse();
+                return result;
             }
 
             try
@@ -138,6 +118,12 @@ namespace Aligned.Controllers
         [HttpGet("get/{id}")]
         public async Task<IActionResult> GetCompanyById(Guid id)
         {
+            string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+            var result = Helper.ValidateTokenAndPermission(_connection, token, "Company", "canList", HttpContext);
+            if (result != null)
+            {
+                return result;
+            }
             try
             {
                 var Data = _companyRepository.GetCompanyById(id);
@@ -152,6 +138,12 @@ namespace Aligned.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAllCompanies()
         {
+            string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+            var result = Helper.ValidateTokenAndPermission(_connection, token, "Company", "canList", HttpContext);
+            if (result != null)
+            {
+                return result;
+            }
             try
             {
                 var Data = _companyRepository.GetAllCompanies();

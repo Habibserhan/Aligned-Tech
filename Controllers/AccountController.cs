@@ -32,31 +32,33 @@ namespace Aligned.Controllers
             _connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
         }
 
-        private IActionResult ValidateTokenAndPermission(string permissionType)
-        {
-            string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
-
-             Guid userid =Helper.GetUserIdFromToken(token);
-
-            if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
-            {
-                return Helper.UnauthorizedResponse();
-            }
+        //private IActionResult ValidateTokenAndPermission(string permissionType)
+        //{
            
-                if (!Helper.HasPermission(_connection, userid, "Users", permissionType))
-                {
-                    return Helper.ForbiddenResponse();
-                }
+
+        //     Guid userid =Helper.GetUserIdFromToken(token);
+
+        //    if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
+        //    {
+        //        return Helper.UnauthorizedResponse();
+        //    }
+           
+        //        if (!Helper.HasPermission(_connection, userid, "Users", permissionType))
+        //        {
+        //            return Helper.ForbiddenResponse();
+        //        }
             
 
-            return null;
-        }
+        //    return null;
+        //}
 
 
         [HttpPost("create")]
         public IActionResult CreateUser([FromBody] User user)
         {
-            var result = ValidateTokenAndPermission("CanAdd");
+          
+            string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+            var result = Helper.ValidateTokenAndPermission(_connection, token,"Users","CanAdd", HttpContext);
             if (result != null)
             {
                 return result;
@@ -84,7 +86,8 @@ namespace Aligned.Controllers
         [HttpPost("update")]
         public IActionResult UpdateUser([FromBody] User user)
         {
-            var result = ValidateTokenAndPermission("CanEdit");
+            string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+            var result = Helper.ValidateTokenAndPermission(_connection, token, "Users", "CanEdit", HttpContext);
             if (result != null)
             {
                 return result;

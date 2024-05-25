@@ -222,6 +222,26 @@ public static class Helper
         }
         return permissions;
     }
+    public static IActionResult ValidateTokenAndPermission(SqlConnection _connection,string Token,string Page ,string permissionType, HttpContext context)
+    {
+       
+      
+
+        Guid userid = Helper.GetUserIdFromToken(Token);
+
+        if (CheckTokenValidity(_connection, Token, context))
+        {
+            return Helper.UnauthorizedResponse();
+        }
+
+        if (HasPermission(_connection, userid, Page, permissionType))
+        {
+            return Helper.ForbiddenResponse();
+        }
+
+
+        return null;
+    }
 
     #endregion
 
