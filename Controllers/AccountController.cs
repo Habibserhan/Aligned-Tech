@@ -23,8 +23,6 @@ namespace Aligned.Controllers
         public AccountController(IUserRepository userRepository, IJwtSettingsRepository jwtSettingsRepository, IUserTokenRepository userTokenRepository, IConfiguration configuration)
 
 
-
-
         {
             _userRepository = userRepository;
             _jwtSettingsRepository = jwtSettingsRepository;
@@ -32,26 +30,7 @@ namespace Aligned.Controllers
             _connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
         }
 
-        //private IActionResult ValidateTokenAndPermission(string permissionType)
-        //{
-           
-
-        //     Guid userid =Helper.GetUserIdFromToken(token);
-
-        //    if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
-        //    {
-        //        return Helper.UnauthorizedResponse();
-        //    }
-           
-        //        if (!Helper.HasPermission(_connection, userid, "Users", permissionType))
-        //        {
-        //            return Helper.ForbiddenResponse();
-        //        }
-            
-
-        //    return null;
-        //}
-
+      
 
         [HttpPost("create")]
         public IActionResult CreateUser([FromBody] User user)
