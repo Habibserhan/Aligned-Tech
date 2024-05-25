@@ -18,6 +18,10 @@ namespace Aligned.Repositories
 
         public void CreateUser(User user)
         {
+            if (!Helper.IsPasswordComplex(user.Password))
+            {
+                throw new ArgumentException("Password does not meet complexity requirements.");
+            }
             byte[] encryptedPassword = Helper.EncryptStringToBytes_Aes(user.Password);
 
             using (SqlCommand command = new SqlCommand("SP_CreateUser", _connection))
@@ -122,7 +126,12 @@ namespace Aligned.Repositories
 
         public void UpdateUser(User user)
         {
+            if (!Helper.IsPasswordComplex(user.Password))
+            {
+                throw new ArgumentException("Password does not meet complexity requirements.");
+            }
             byte[] encryptedPassword = Helper.EncryptStringToBytes_Aes(user.Password);
+
 
             using (SqlCommand command = new SqlCommand("SP_UpdateUser", _connection))
             {
