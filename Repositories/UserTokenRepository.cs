@@ -49,7 +49,6 @@ namespace Aligned.Repositories
                 }
             }
         }
-
         public void DeleteOldUserTokens(Guid userId)
         {
             try

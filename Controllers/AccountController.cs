@@ -30,8 +30,6 @@ namespace Aligned.Controllers
             _connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
         }
 
-      
-
         [HttpPost("create")]
         public IActionResult CreateUser([FromBody] User user)
         {

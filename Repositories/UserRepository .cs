@@ -51,8 +51,6 @@ namespace Aligned.Repositories
             }
         }
 
-
-
         public void UpdateUser(User user)
         {
             try
