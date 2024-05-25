@@ -18,10 +18,7 @@ using Aligned.IRepositories;
 
 public static class Helper
 {
-    public static string inttostring()
-    {
-        return "";
-    }
+  
     private static readonly byte[] Key = Encoding.UTF8.GetBytes("8A*?dFj3Yz<zN4&2!Z7@^1qM5gR^B2Fs");
     private static readonly byte[] IV = Encoding.UTF8.GetBytes("9D7f^C3!#@6aQw2*");
 
