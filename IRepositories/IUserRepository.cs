@@ -9,6 +9,7 @@ namespace Aligned.IRepositories
         bool AuthenticateUser(string email, string password);
         User GetUserByEmail(string email);
         void UpdateUser(User user);
+        User GetUserById(Guid userId);
         List<string> GetUserRoles(Guid userId);
         List<Permission> GetUserPermissions(Guid userId);
     }

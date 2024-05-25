@@ -13,11 +13,51 @@ using Aligned.Models;
 using System.Data.Common;
 using System.Data;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc;
+using Aligned.IRepositories;
 
 public static class Helper
 {
     private static readonly byte[] Key = Encoding.UTF8.GetBytes("8A*?dFj3Yz<zN4&2!Z7@^1qM5gR^B2Fs");
     private static readonly byte[] IV = Encoding.UTF8.GetBytes("9D7f^C3!#@6aQw2*");
+
+    #region JsonResultResponse
+    public static JsonResult UnauthorizedResponse()
+    {
+        return new JsonResult(new { success = false, message = "Unauthorized" });
+    }
+    public static JsonResult ForbiddenResponse()
+    {
+        return new JsonResult(new { success = false, message = "You don't have access" });
+    }
+    public static JsonResult CreatedResponse()
+    {
+        return new JsonResult(new { success = true, message = "Record created successfully" });
+    }
+    public static JsonResult UpdateResponse()
+    {
+        return new JsonResult(new { success = true, message = "Record updated successfully" });
+    }
+    public static JsonResult DeleteResponse()
+    {
+        return new JsonResult(new { success = true, message = "Record deleted successfully" });
+    }
+    public static JsonResult FailureResponse(string message)
+    {
+        return new JsonResult(new { success = false, message = message });
+    }
+    public static JsonResult GetByIdResponse<T>(T data)
+    {
+        return new JsonResult(new { success = true, data });
+    }
+
+    public static JsonResult GetAllResponse<T>(IEnumerable<T> data)
+    {
+        return new JsonResult(new { success = true, data });
+    }
+    #endregion
+
+    #region mix
     public static bool IsPasswordComplex(string password)
     {
         // Define the password complexity rules
@@ -122,34 +162,9 @@ public static class Helper
     {
         return DecryptStringFromBytes_Aes(Convert.FromBase64String(base64CipherText));
     }
+    #endregion
 
-    public static string GenerateJwtToken(string issuer, string audience, string signingSecret, string email, long expirySeconds, Guid userId)
-    {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingSecret));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("UserId", userId.ToString())
-        };
-
-        var token = new JwtSecurityToken(
-            issuer,
-            audience,
-            claims,
-            expires: DateTime.Now.AddSeconds(expirySeconds),
-            signingCredentials: credentials);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    public static string GetTokenFromHeaders(HttpRequest request)
-    {
-        var authorizationHeader = request.Headers["Authorization"].ToString();
-        return authorizationHeader.StartsWith("Bearer ") ? authorizationHeader.Substring(7) : authorizationHeader;
-    }
+    #region Permission
     public static bool HasPermission(SqlConnection connection, Guid userId, string pageName, string permissionType)
     {
         var permissions = GetUserPermissions(connection, userId);
@@ -205,6 +220,37 @@ public static class Helper
         return permissions;
     }
 
+    #endregion
+
+    #region JWT Token
+    public static string GenerateJwtToken(string issuer, string audience, string signingSecret, string email, long expirySeconds, Guid userId)
+    {
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingSecret));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("UserId", userId.ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer,
+            audience,
+            claims,
+            expires: DateTime.Now.AddSeconds(expirySeconds),
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public static string GetTokenFromHeaders(HttpRequest request)
+    {
+        var authorizationHeader = request.Headers["Authorization"].ToString();
+        return authorizationHeader.StartsWith("Bearer ") ? authorizationHeader.Substring(7) : authorizationHeader;
+    }
+
     public static bool CheckTokenValidity(SqlConnection connection, string token, HttpContext context)
     {
         try
@@ -253,4 +299,54 @@ public static class Helper
         var userIdClaim = jwtToken.Claims.FirstOrDefault(claim => claim.Type == "UserId");
         return Guid.Parse(userIdClaim?.Value);
     }
+
+    public static string RefreshToken(string expiredToken, SqlConnection connection, HttpContext context, IUserRepository userRepository, IJwtSettingsRepository jwtSettingsRepository)
+    {
+        var userId = GetUserIdFromToken(expiredToken);
+        var user = userRepository.GetUserById(userId);
+
+        if (user != null && AuthenticateUser(user.Email, user.Password, userRepository))
+        {
+            var jwtSettings = jwtSettingsRepository.GetJwtSettings();
+            return GenerateJwtToken(jwtSettings.JwtIssuer, jwtSettings.JwtAudience, jwtSettings.JwtSigningSecret, user.Email, Convert.ToInt64(jwtSettings.ExpiryToken), user.Id);
+        }
+
+        return null;
+    }
+
+
+
+    private static bool AuthenticateUser(string email, string password, IUserRepository userRepository)
+    {
+        return userRepository.AuthenticateUser(email, password);
+    }
+
+    public static bool IsTokenExpired(string token, string signingSecret)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = false,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingSecret))
+        };
+
+        try
+        {
+            var principal = tokenHandler.ValidateToken(token, validationParameters, out var securityToken);
+            if (securityToken is JwtSecurityToken jwtToken)
+            {
+                return jwtToken.ValidTo < DateTime.UtcNow;
+            }
+        }
+        catch (Exception)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    #endregion
 }

@@ -25,17 +25,20 @@ namespace Aligned.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] CompanyCreateDto companyDto)
         {
+           
             string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
             if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
             {
-                return Unauthorized();
+                return Helper.UnauthorizedResponse();
+
+
             }
 
             var userId = Helper.GetUserIdFromToken(token);
 
             if (!Helper.HasPermission(_connection, userId, "Company", "CanAdd"))
             {
-                return Forbid();
+                return Helper.ForbiddenResponse();
             }
 
             try
@@ -55,11 +58,11 @@ namespace Aligned.Controllers
                 };
 
                 _companyRepository.CreateCompany(company);
-                return new JsonResult(new { success = true, message = "Company created successfully" });
+                return Helper.CreatedResponse();
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                return Helper.FailureResponse(ex.Message);
             }
         }
 
@@ -69,14 +72,15 @@ namespace Aligned.Controllers
             string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
             if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
             {
-                return Unauthorized();
+                return Helper.UnauthorizedResponse(); ;
             }
 
             var userId = Helper.GetUserIdFromToken(token);
 
             if (!Helper.HasPermission(_connection, userId, "Company", "CanEdit"))
             {
-                return Forbid();
+
+                return Helper.ForbiddenResponse();
             }
 
             try
@@ -96,11 +100,11 @@ namespace Aligned.Controllers
                 };
 
                 _companyRepository.UpdateCompany(company);
-                return new JsonResult(new { success = true, message = "Company updated successfully" });
+                return Helper.UpdateResponse();
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                return Helper.FailureResponse(ex.Message);
             }
         }
 
@@ -110,24 +114,24 @@ namespace Aligned.Controllers
             string token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
             if (!Helper.CheckTokenValidity(_connection, token, HttpContext))
             {
-                return Unauthorized();
+                return Helper.UnauthorizedResponse();
             }
 
             var userId = Helper.GetUserIdFromToken(token);
 
             if (!Helper.HasPermission(_connection, userId, "Company", "CanDelete"))
             {
-                return Forbid();
+                return Helper.ForbiddenResponse();
             }
 
             try
             {
                 _companyRepository.DeleteCompany(id);
-                return new JsonResult(new { success = true, message = "Company deleted successfully" });
+                 return Helper.DeleteResponse();
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                return Helper.FailureResponse(ex.Message);
             }
         }
 
@@ -136,12 +140,12 @@ namespace Aligned.Controllers
         {
             try
             {
-                var company = _companyRepository.GetCompanyById(id);
-                return new JsonResult(new { success = true, data = company });
+                var Data = _companyRepository.GetCompanyById(id);
+                return Helper.GetByIdResponse(Data);
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                return Helper.FailureResponse(ex.Message);
             }
         }
 
@@ -150,12 +154,12 @@ namespace Aligned.Controllers
         {
             try
             {
-                var companies = _companyRepository.GetAllCompanies();
-                return new JsonResult(new { success = true, data = companies });
+                var Data = _companyRepository.GetAllCompanies();
+                return Helper.GetAllResponse(Data);
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                return Helper.FailureResponse(ex.Message);
             }
         }
     }
