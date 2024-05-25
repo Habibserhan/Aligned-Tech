@@ -1,0 +1,848 @@
+USE [Aligned]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_UpdateUser]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_UpdateUser]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_UpdateCompanyType]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_UpdateCompanyType]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_UpdateCompany]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_UpdateCompany]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_RefreshToken]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_RefreshToken]
+GO`
+/****** Object:  StoredProcedure [dbo].[SP_InsertUserToken]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_InsertUserToken]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetUserRoles]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetUserRoles]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetUserPermissions]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetUserPermissions]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetUserById]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetUserById]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetUserByEmail]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetUserByEmail]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetJwtSettings]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetJwtSettings]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetCompanyTypeById]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetCompanyTypeById]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetCompanyById]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetCompanyById]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetAllCompanyTypes]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetAllCompanyTypes]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetAllCompanies]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_GetAllCompanies]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_DeleteOldUserTokens]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_DeleteOldUserTokens]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_DeleteCompanyType]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_DeleteCompanyType]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_DeleteCompany]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_DeleteCompany]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_CreateUser]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_CreateUser]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_CreateCompanyType]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_CreateCompanyType]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_CreateCompany]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_CreateCompany]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_CheckTokenValidity]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_CheckTokenValidity]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_AuthenticateUser]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP PROCEDURE [dbo].[SP_AuthenticateUser]
+GO
+ALTER TABLE [dbo].[UserTokens] DROP CONSTRAINT [FK__UserToken__UserI__6A30C649]
+GO
+ALTER TABLE [dbo].[UserRoles] DROP CONSTRAINT [FK__UserRoles__UserI__7B5B524B]
+GO
+ALTER TABLE [dbo].[UserRoles] DROP CONSTRAINT [FK__UserRoles__RoleI__7C4F7684]
+GO
+ALTER TABLE [dbo].[Permissions] DROP CONSTRAINT [FK__Permissio__RoleI__778AC167]
+GO
+ALTER TABLE [dbo].[Permissions] DROP CONSTRAINT [FK__Permissio__PageI__76969D2E]
+GO
+ALTER TABLE [dbo].[Company] DROP CONSTRAINT [FK__Company__Company__09A971A2]
+GO
+ALTER TABLE [dbo].[UserTokens] DROP CONSTRAINT [DF_UserTokens_Id]
+GO
+ALTER TABLE [dbo].[Users] DROP CONSTRAINT [DF_Users_Id]
+GO
+ALTER TABLE [dbo].[Roles] DROP CONSTRAINT [DF_Roles_RoleId]
+GO
+ALTER TABLE [dbo].[Permissions] DROP CONSTRAINT [DF_Permissions_PageId]
+GO
+ALTER TABLE [dbo].[Permissions] DROP CONSTRAINT [DF_Permissions_PermissionId]
+GO
+ALTER TABLE [dbo].[Pages] DROP CONSTRAINT [DF_Pages_PageId]
+GO
+ALTER TABLE [dbo].[JwtSettings] DROP CONSTRAINT [DF__JwtSettings__Id__38996AB5]
+GO
+ALTER TABLE [dbo].[CompanyType] DROP CONSTRAINT [DF_CompanyType_Id]
+GO
+/****** Object:  Index [UQ__Users__A9D105346B81AFF6]    Script Date: 25/05/2024 9:53:35 PM ******/
+ALTER TABLE [dbo].[Users] DROP CONSTRAINT [UQ__Users__A9D105346B81AFF6]
+GO
+/****** Object:  Table [dbo].[UserTokens]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserTokens]') AND type in (N'U'))
+DROP TABLE [dbo].[UserTokens]
+GO
+/****** Object:  Table [dbo].[Users]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Users]') AND type in (N'U'))
+DROP TABLE [dbo].[Users]
+GO
+/****** Object:  Table [dbo].[UserRoles]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserRoles]') AND type in (N'U'))
+DROP TABLE [dbo].[UserRoles]
+GO
+/****** Object:  Table [dbo].[Roles]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Roles]') AND type in (N'U'))
+DROP TABLE [dbo].[Roles]
+GO
+/****** Object:  Table [dbo].[Permissions]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Permissions]') AND type in (N'U'))
+DROP TABLE [dbo].[Permissions]
+GO
+/****** Object:  Table [dbo].[Pages]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Pages]') AND type in (N'U'))
+DROP TABLE [dbo].[Pages]
+GO
+/****** Object:  Table [dbo].[JwtSettings]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[JwtSettings]') AND type in (N'U'))
+DROP TABLE [dbo].[JwtSettings]
+GO
+/****** Object:  Table [dbo].[CompanyType]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CompanyType]') AND type in (N'U'))
+DROP TABLE [dbo].[CompanyType]
+GO
+/****** Object:  Table [dbo].[Company]    Script Date: 25/05/2024 9:53:35 PM ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Company]') AND type in (N'U'))
+DROP TABLE [dbo].[Company]
+GO
+USE [master]
+GO
+/****** Object:  Database [Aligned]    Script Date: 25/05/2024 9:53:35 PM ******/
+DROP DATABASE [Aligned]
+GO
+/****** Object:  Database [Aligned]    Script Date: 25/05/2024 9:53:35 PM ******/
+CREATE DATABASE [Aligned]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Aligened', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\Aligned.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'Aligened_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\Aligned_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [Aligned].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [Aligned] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [Aligned] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [Aligned] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [Aligned] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [Aligned] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [Aligned] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [Aligned] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [Aligned] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [Aligned] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [Aligned] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [Aligned] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [Aligned] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [Aligned] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [Aligned] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [Aligned] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [Aligned] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [Aligned] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [Aligned] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [Aligned] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [Aligned] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [Aligned] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [Aligned] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [Aligned] SET RECOVERY FULL 
+GO
+ALTER DATABASE [Aligned] SET  MULTI_USER 
+GO
+ALTER DATABASE [Aligned] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [Aligned] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [Aligned] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [Aligned] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [Aligned] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [Aligned] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'Aligned', N'ON'
+GO
+ALTER DATABASE [Aligned] SET QUERY_STORE = ON
+GO
+ALTER DATABASE [Aligned] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
+GO
+USE [Aligned]
+GO
+/****** Object:  Table [dbo].[Company]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Company](
+	[Id] [uniqueidentifier] NOT NULL,
+	[Name] [nvarchar](255) NOT NULL,
+	[Address] [nvarchar](255) NULL,
+	[Telephone] [nvarchar](50) NULL,
+	[Mobile] [nvarchar](50) NULL,
+	[OwnerName] [nvarchar](255) NULL,
+	[CompanyTypeId] [uniqueidentifier] NULL,
+	[ContactPersonName] [nvarchar](255) NULL,
+	[ContactPersonEmail] [nvarchar](255) NULL,
+	[Active] [bit] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[CompanyType]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CompanyType](
+	[Id] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[Name] [nvarchar](255) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[JwtSettings]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[JwtSettings](
+	[Id] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[ExpiryToken] [int] NULL,
+	[EncryptedJwtIssuer] [varbinary](max) NULL,
+	[EncryptedJwtAudience] [varbinary](max) NULL,
+	[EncryptedJwtSigningSecret] [varbinary](max) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Pages]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Pages](
+	[PageId] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[PageName] [nvarchar](255) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[PageId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Permissions]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Permissions](
+	[PermissionId] [uniqueidentifier] NOT NULL,
+	[PageId] [uniqueidentifier] NULL,
+	[RoleId] [uniqueidentifier] NULL,
+	[CanAdd] [bit] NULL,
+	[CanEdit] [bit] NULL,
+	[CanDelete] [bit] NULL,
+	[CanView] [bit] NULL,
+	[CanList] [bit] NULL,
+	[CanImport] [bit] NULL,
+	[CanExport] [bit] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[PermissionId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Roles]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Roles](
+	[RoleId] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[RoleName] [nvarchar](255) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[RoleId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UserRoles]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserRoles](
+	[UserId] [uniqueidentifier] NOT NULL,
+	[RoleId] [uniqueidentifier] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[UserId] ASC,
+	[RoleId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Users]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Users](
+	[Id] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[Email] [nvarchar](255) NOT NULL,
+	[FullName] [nvarchar](255) NULL,
+	[Password] [varbinary](max) NULL,
+	[Active] [bit] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UserTokens]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserTokens](
+	[Id] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
+	[UserId] [uniqueidentifier] NULL,
+	[Token] [nvarchar](max) NULL,
+	[CreatedAt] [datetime] NULL,
+	[IpAddress] [nvarchar](50) NULL,
+	[Browser] [nvarchar](255) NULL,
+	[PcName] [nvarchar](255) NULL,
+	[Expiry] [datetime] NULL,
+	[RefreshToken] [nvarchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+INSERT [dbo].[Company] ([Id], [Name], [Address], [Telephone], [Mobile], [OwnerName], [CompanyTypeId], [ContactPersonName], [ContactPersonEmail], [Active]) VALUES (N'7c8305a9-f20b-467a-811c-339e77781b31', N'Company c', N'123 Main St', N'123-456-7890', N'098-765-4321', N'Owner A', N'6461b762-440e-47fe-a5cc-8f536daebce7', N'Contact A', N'contact@example.com', 1)
+INSERT [dbo].[Company] ([Id], [Name], [Address], [Telephone], [Mobile], [OwnerName], [CompanyTypeId], [ContactPersonName], [ContactPersonEmail], [Active]) VALUES (N'4b4a8a5b-8922-48ec-99ba-4722b2efa71a', N'Company c', N'123 Main St', N'123-456-7890', N'098-765-4321', N'Owner A', N'6461b762-440e-47fe-a5cc-8f536daebce7', N'Contact A', N'contact@example.com', 1)
+INSERT [dbo].[Company] ([Id], [Name], [Address], [Telephone], [Mobile], [OwnerName], [CompanyTypeId], [ContactPersonName], [ContactPersonEmail], [Active]) VALUES (N'2914b53a-f30d-47af-8ada-66b4a55d1b2e', N'Company c', N'123 Main St', N'123-456-7890', N'098-765-4321', N'Owner A', N'6461b762-440e-47fe-a5cc-8f536daebce7', N'Contact A', N'contact@example.com', 1)
+INSERT [dbo].[Company] ([Id], [Name], [Address], [Telephone], [Mobile], [OwnerName], [CompanyTypeId], [ContactPersonName], [ContactPersonEmail], [Active]) VALUES (N'df206451-9ea6-497b-a8db-7ae13f59293e', N'Company c', N'123 Main St', N'123-456-7890', N'098-765-4321', N'Owner A', N'6461b762-440e-47fe-a5cc-8f536daebce7', N'Contact A', N'contact@example.com', 1)
+INSERT [dbo].[Company] ([Id], [Name], [Address], [Telephone], [Mobile], [OwnerName], [CompanyTypeId], [ContactPersonName], [ContactPersonEmail], [Active]) VALUES (N'5cc9ad35-c810-4f15-9c07-851e87f32c60', N'Company c', N'123 Main St', N'123-456-7890', N'098-765-4321', N'Owner A', N'6461b762-440e-47fe-a5cc-8f536daebce7', N'Contact A', N'contact@example.com', 1)
+INSERT [dbo].[Company] ([Id], [Name], [Address], [Telephone], [Mobile], [OwnerName], [CompanyTypeId], [ContactPersonName], [ContactPersonEmail], [Active]) VALUES (N'f611eb15-20d4-443c-9eb2-b7503b3df2e5', N'Company b', N'123 Main St', N'123-456-7890', N'098-765-4321', N'Owner A', N'6461b762-440e-47fe-a5cc-8f536daebce7', N'Contact A', N'contact@example.com', 1)
+INSERT [dbo].[Company] ([Id], [Name], [Address], [Telephone], [Mobile], [OwnerName], [CompanyTypeId], [ContactPersonName], [ContactPersonEmail], [Active]) VALUES (N'b3d2d7d2-5140-4fac-83e7-d07309d469bb', N'Company c', N'123 Main St', N'123-456-7890', N'098-765-4321', N'Owner A', N'6461b762-440e-47fe-a5cc-8f536daebce7', N'Contact A', N'contact@example.com', 1)
+INSERT [dbo].[Company] ([Id], [Name], [Address], [Telephone], [Mobile], [OwnerName], [CompanyTypeId], [ContactPersonName], [ContactPersonEmail], [Active]) VALUES (N'92f0d8dc-f306-4337-9ffb-d8a164ef0c66', N'Company A', N'123 Main St', N'123-456-7890', N'098-765-4321', N'Owner A', N'6461b762-440e-47fe-a5cc-8f536daebce7', N'Contact A', N'contact@example.com', 1)
+GO
+INSERT [dbo].[CompanyType] ([Id], [Name]) VALUES (N'6461b762-440e-47fe-a5cc-8f536daebce7', N'IT')
+GO
+INSERT [dbo].[JwtSettings] ([Id], [ExpiryToken], [EncryptedJwtIssuer], [EncryptedJwtAudience], [EncryptedJwtSigningSecret]) VALUES (N'93f0034e-a0dd-4120-8ed7-c4279da5ab90', 100000, 0x15F4225E9CB8190045C621E21FE99413340E0328543F98A1FE2C13E1F8BA226A9AE654A33A97023742CC67A9F0D96C34, 0x0C8F816887E0BA377A4CF05B1EB6A1EF77C0029DB50A1B94B64E68BC2A16EF58, 0x13162FD5CBBD5B1D6AD17795DE7DFBC1763FFAE967EDE9D09190A83665AC4CC0DB55EC92C03A8B8B1A92A3B6AD5A045DAC2A2E650809A673DF0D570A0897848CFC8D877C9A3C908073E1038C3266392E)
+GO
+INSERT [dbo].[Pages] ([PageId], [PageName]) VALUES (N'093fe73c-c851-4f45-9dec-1de3fd7997e9', N'Company')
+INSERT [dbo].[Pages] ([PageId], [PageName]) VALUES (N'950f49e2-122a-4682-9f80-75c4c44de69c', N'Users')
+INSERT [dbo].[Pages] ([PageId], [PageName]) VALUES (N'8f6698cc-9196-4fe7-8b0c-ef5f6445d1fe', N'Company Type')
+GO
+INSERT [dbo].[Permissions] ([PermissionId], [PageId], [RoleId], [CanAdd], [CanEdit], [CanDelete], [CanView], [CanList], [CanImport], [CanExport]) VALUES (N'8cdd1072-b135-4959-b065-7766f3ca1f92', N'950f49e2-122a-4682-9f80-75c4c44de69c', N'8f7f86c3-d27c-40f8-a70c-28631ceb5fe4', 1, 1, 1, 1, 1, 1, 1)
+GO
+INSERT [dbo].[Roles] ([RoleId], [RoleName]) VALUES (N'8f7f86c3-d27c-40f8-a70c-28631ceb5fe4', N'Admin')
+GO
+INSERT [dbo].[UserRoles] ([UserId], [RoleId]) VALUES (N'121344c5-e3ea-49be-97ba-5259a826a613', N'8f7f86c3-d27c-40f8-a70c-28631ceb5fe4')
+GO
+INSERT [dbo].[Users] ([Id], [Email], [FullName], [Password], [Active]) VALUES (N'121344c5-e3ea-49be-97ba-5259a826a613', N'ayyad5.com', N'Bibo', 0xBCB3DB451985EC43F625CD18E160F0B0, 1)
+INSERT [dbo].[Users] ([Id], [Email], [FullName], [Password], [Active]) VALUES (N'd0912d9f-b174-4f2a-b5e3-e28b8bbacc65', N'Habib.serhan21@gmail.com', N'Habib Serhan', 0x6B9F5F96B646F793031E167374795F1A, 1)
+GO
+INSERT [dbo].[UserTokens] ([Id], [UserId], [Token], [CreatedAt], [IpAddress], [Browser], [PcName], [Expiry], [RefreshToken]) VALUES (N'f6a5bf9b-9a59-42af-b4c2-ccd6d426df0e', N'121344c5-e3ea-49be-97ba-5259a826a613', N'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJheXlhZDUuY29tIiwianRpIjoiMGQxNzI5NWYtZmUxNC00MzRlLWJmMDYtNzE4OTk2OWFjYjdjIiwiVXNlcklkIjoiMTIxMzQ0YzUtZTNlYS00OWJlLTk3YmEtNTI1OWE4MjZhNjEzIiwiZXhwIjoxNzE2NzU4NTE2LCJpc3MiOiJyTjZyZ1JuMkIxSEsvUDJPQ2ZWblprVStlM1N2ZlhlYUtWaVdqbnFIQ3hrPSIsImF1ZCI6InBka3hsYk9odERYeFZaVEZ6b0c4MlE9PSJ9.hYiu5Z4WspY8p4scUFY_H9dNq2Mnu4JAa9g3X_1URgQ', CAST(N'2024-05-25T17:35:16.937' AS DateTime), N'0.0.0.1', N'PostmanRuntime/7.39.0', N'Aligned', CAST(N'2024-05-27T00:21:56.933' AS DateTime), N'jxkSCmx/ziGMxgI8n2VLSDljnqapG6d77zNypHDrQSQ=')
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UQ__Users__A9D105346B81AFF6]    Script Date: 25/05/2024 9:53:36 PM ******/
+ALTER TABLE [dbo].[Users] ADD UNIQUE NONCLUSTERED 
+(
+	[Email] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[CompanyType] ADD  CONSTRAINT [DF_CompanyType_Id]  DEFAULT (newid()) FOR [Id]
+GO
+ALTER TABLE [dbo].[JwtSettings] ADD  DEFAULT (newid()) FOR [Id]
+GO
+ALTER TABLE [dbo].[Pages] ADD  CONSTRAINT [DF_Pages_PageId]  DEFAULT (newid()) FOR [PageId]
+GO
+ALTER TABLE [dbo].[Permissions] ADD  CONSTRAINT [DF_Permissions_PermissionId]  DEFAULT (newid()) FOR [PermissionId]
+GO
+ALTER TABLE [dbo].[Permissions] ADD  CONSTRAINT [DF_Permissions_PageId]  DEFAULT (newid()) FOR [PageId]
+GO
+ALTER TABLE [dbo].[Roles] ADD  CONSTRAINT [DF_Roles_RoleId]  DEFAULT (newid()) FOR [RoleId]
+GO
+ALTER TABLE [dbo].[Users] ADD  CONSTRAINT [DF_Users_Id]  DEFAULT (newid()) FOR [Id]
+GO
+ALTER TABLE [dbo].[UserTokens] ADD  CONSTRAINT [DF_UserTokens_Id]  DEFAULT (newid()) FOR [Id]
+GO
+ALTER TABLE [dbo].[Company]  WITH CHECK ADD FOREIGN KEY([CompanyTypeId])
+REFERENCES [dbo].[CompanyType] ([Id])
+GO
+ALTER TABLE [dbo].[Permissions]  WITH CHECK ADD FOREIGN KEY([PageId])
+REFERENCES [dbo].[Pages] ([PageId])
+GO
+ALTER TABLE [dbo].[Permissions]  WITH CHECK ADD FOREIGN KEY([RoleId])
+REFERENCES [dbo].[Roles] ([RoleId])
+GO
+ALTER TABLE [dbo].[UserRoles]  WITH CHECK ADD FOREIGN KEY([RoleId])
+REFERENCES [dbo].[Roles] ([RoleId])
+GO
+ALTER TABLE [dbo].[UserRoles]  WITH CHECK ADD FOREIGN KEY([UserId])
+REFERENCES [dbo].[Users] ([Id])
+GO
+ALTER TABLE [dbo].[UserTokens]  WITH CHECK ADD FOREIGN KEY([UserId])
+REFERENCES [dbo].[Users] ([Id])
+GO
+/****** Object:  StoredProcedure [dbo].[SP_AuthenticateUser]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure to authenticate a user
+CREATE PROCEDURE [dbo].[SP_AuthenticateUser]
+    @Email NVARCHAR(255)
+AS
+BEGIN
+    SELECT Password FROM Users WHERE Email = @Email;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_CheckTokenValidity]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_CheckTokenValidity]
+    @UserId NVARCHAR(450),
+    @Token NVARCHAR(MAX),
+	@Browser NVARCHAR(MAX),
+	@Pcname NVARCHAR(MAX)
+AS
+BEGIN
+    SELECT COUNT(*) 
+    FROM UserTokens 
+    WHERE UserId = @UserId AND Token = @Token And browser=@browser and pcname=@Pcname and Expiry>GETDATE()
+END
+GO
+/****** Object:  StoredProcedure [dbo].[SP_CreateCompany]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_CreateCompany]
+    @Id UNIQUEIDENTIFIER,
+    @Name NVARCHAR(255),
+    @Address NVARCHAR(255),
+    @Telephone NVARCHAR(50),
+    @Mobile NVARCHAR(50),
+    @OwnerName NVARCHAR(255),
+    @CompanyTypeId UNIQUEIDENTIFIER,
+    @ContactPersonName NVARCHAR(255),
+    @ContactPersonEmail NVARCHAR(255),
+    @Active BIT
+AS
+BEGIN
+    INSERT INTO Company (Id, Name, Address, Telephone, Mobile, OwnerName, CompanyTypeId, ContactPersonName, ContactPersonEmail, Active)
+    VALUES (@Id, @Name, @Address, @Telephone, @Mobile, @OwnerName, @CompanyTypeId, @ContactPersonName, @ContactPersonEmail, @Active);
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_CreateCompanyType]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_CreateCompanyType]
+    @CompanyName NVARCHAR(255)
+AS
+BEGIN
+    INSERT INTO CompanyType (Name)
+    VALUES (@CompanyName);
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_CreateUser]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure to create a user
+CREATE PROCEDURE [dbo].[SP_CreateUser]
+    @Id UNIQUEIDENTIFIER,
+    @Email NVARCHAR(255),
+    @FullName NVARCHAR(255),
+    @Password VARBINARY(MAX),
+    @Active BIT
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Users WHERE Email = @Email)
+    BEGIN
+        THROW 50000, 'Email already exists.', 1;
+    END
+
+    INSERT INTO Users (Id, Email, FullName, Password, Active)
+    VALUES (@Id, @Email, @FullName, @Password, @Active);
+END
+GO
+/****** Object:  StoredProcedure [dbo].[SP_DeleteCompany]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[SP_DeleteCompany]
+    @Id UNIQUEIDENTIFIER
+AS
+BEGIN
+    DELETE FROM Company WHERE Id = @Id;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_DeleteCompanyType]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_DeleteCompanyType]
+    @CompanyTypeId UNIQUEIDENTIFIER
+AS
+BEGIN
+    DELETE FROM CompanyType WHERE id = @CompanyTypeId;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_DeleteOldUserTokens]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure to delete old user tokens
+CREATE PROCEDURE [dbo].[SP_DeleteOldUserTokens]
+    @UserId UNIQUEIDENTIFIER
+AS
+BEGIN
+    DELETE FROM UserTokens WHERE UserId = @UserId;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetAllCompanies]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_GetAllCompanies]
+AS
+BEGIN
+    SELECT
+        c.Id,
+        c.Name,
+        c.Address,
+        c.Telephone,
+        c.Mobile,
+        c.OwnerName,
+        c.CompanyTypeId,
+        ct.Name AS CompanyTypeName,
+        c.ContactPersonName,
+        c.ContactPersonEmail,
+        c.Active
+    FROM Company c
+    INNER JOIN CompanyType ct ON c.CompanyTypeId = ct.Id;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetAllCompanyTypes]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_GetAllCompanyTypes]
+AS
+BEGIN
+    SELECT * FROM CompanyTypes
+END
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetCompanyById]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[SP_GetCompanyById]
+    @id UNIQUEIDENTIFIER
+AS
+BEGIN
+    SELECT * FROM Company where id=@id 
+
+END
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetCompanyTypeById]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_GetCompanyTypeById]
+    @CompanyTypeId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SELECT * FROM CompanyTypes
+    WHERE CompanyTypeId = @CompanyTypeId
+END
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetJwtSettings]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[SP_GetJwtSettings]
+AS
+BEGIN
+    SELECT
+        EncryptedJwtIssuer,
+        EncryptedJwtAudience,
+        EncryptedJwtSigningSecret,
+        ExpiryToken
+    FROM JwtSettings;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetUserByEmail]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure to get a user by email
+CREATE PROCEDURE [dbo].[SP_GetUserByEmail]
+    @Email NVARCHAR(255)
+AS
+BEGIN
+    SELECT Id, Email, FullName, Password, Active FROM Users WHERE Email = @Email and Active=1
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetUserById]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[SP_GetUserById]
+    @Id UNIQUEIDENTIFIER
+AS
+BEGIN
+    SELECT Id, Email, FullName, Password, Active
+    FROM Users
+    WHERE Id = @Id;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetUserPermissions]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure to get permissions for a user
+CREATE PROCEDURE [dbo].[SP_GetUserPermissions]
+    @UserId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SELECT
+        p.PageName,
+        pr.CanAdd,
+        pr.CanEdit,
+        pr.CanDelete,
+        pr.CanView,
+        pr.CanList,
+        pr.CanImport,
+        pr.CanExport
+    FROM Permissions pr
+    INNER JOIN Pages p ON pr.PageId = p.PageId
+    INNER JOIN Roles r ON pr.RoleId = r.RoleId
+    INNER JOIN UserRoles ur ON r.RoleId = ur.RoleId
+    WHERE ur.UserId = @UserId;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_GetUserRoles]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure to get user roles
+CREATE PROCEDURE [dbo].[SP_GetUserRoles]
+    @UserId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SELECT r.RoleName
+    FROM Roles r
+    INNER JOIN UserRoles ur ON r.RoleId = ur.RoleId
+    WHERE ur.UserId = @UserId;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_InsertUserToken]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Procedure to insert a user token
+CREATE PROCEDURE [dbo].[SP_InsertUserToken]
+    @Id UNIQUEIDENTIFIER,
+    @UserId UNIQUEIDENTIFIER,
+    @Token NVARCHAR(MAX),
+    @CreatedAt DATETIME,
+    @IpAddress NVARCHAR(50),
+    @Browser NVARCHAR(255),
+    @PcName NVARCHAR(255),
+	@RefreshToken NVARCHAR(255),
+	@Expiry DATETIME
+
+AS
+BEGIN
+    INSERT INTO UserTokens (Id, UserId, Token, CreatedAt, IpAddress, Browser, PcName,RefreshToken,Expiry)
+    VALUES (@Id, @UserId, @Token, @CreatedAt, @IpAddress, @Browser, @PcName,@RefreshToken,@Expiry );
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_RefreshToken]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_RefreshToken]
+    @OldToken NVARCHAR(255),
+    @NewToken NVARCHAR(255),
+    @NewExpiry DATETIME,
+    @NewRefreshToken NVARCHAR(255)
+AS
+BEGIN
+    UPDATE UserToken
+    SET Token = @NewToken, Expiry = @NewExpiry, RefreshToken = @NewRefreshToken
+    WHERE Token = @OldToken;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_UpdateCompany]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[SP_UpdateCompany]
+    @Id UNIQUEIDENTIFIER,
+    @Name NVARCHAR(255),
+    @Address NVARCHAR(255),
+    @Telephone NVARCHAR(50),
+    @Mobile NVARCHAR(50),
+    @OwnerName NVARCHAR(255),
+    @CompanyTypeId UNIQUEIDENTIFIER,
+    @ContactPersonName NVARCHAR(255),
+    @ContactPersonEmail NVARCHAR(255),
+    @Active BIT
+AS
+BEGIN
+    UPDATE Company
+    SET Name = @Name,
+        Address = @Address,
+        Telephone = @Telephone,
+        Mobile = @Mobile,
+        OwnerName = @OwnerName,
+        CompanyTypeId = @CompanyTypeId,
+        ContactPersonName = @ContactPersonName,
+        ContactPersonEmail = @ContactPersonEmail,
+        Active = @Active
+    WHERE Id = @Id;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_UpdateCompanyType]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_UpdateCompanyType]
+    @CompanyTypeId UNIQUEIDENTIFIER,
+    @CompanyName NVARCHAR(255)
+AS
+BEGIN
+    UPDATE CompanyType
+    SET Name = @CompanyName
+    WHERE id = @CompanyTypeId;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_UpdateUser]    Script Date: 25/05/2024 9:53:36 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_UpdateUser]
+    @Id UNIQUEIDENTIFIER,
+    @Email NVARCHAR(255),
+    @FullName NVARCHAR(255),
+    @Password VARBINARY(MAX),
+    @Active BIT
+AS
+BEGIN
+    -- Check if the email already exists for a different user
+    IF EXISTS (SELECT 1 FROM Users WHERE Email = @Email AND Id <> @Id)
+    BEGIN
+        -- Return an error message
+        RAISERROR ('The email address is already in use by another user.', 16, 1);
+        RETURN;
+    END
+
+    -- Proceed with the update if the email is not in use
+    UPDATE Users
+    SET Email = @Email, FullName = @FullName, Password = @Password, Active = @Active
+    WHERE Id = @Id;
+END;
+GO
+USE [master]
+GO
+ALTER DATABASE [Aligned] SET  READ_WRITE 
+GO
