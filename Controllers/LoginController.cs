@@ -16,14 +16,14 @@ namespace Aligned.Controllers
     [Route("api/v{v:apiVersion}/[controller]")]
     public class LoginController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
+        private readonly ILoginRepository _loginRepository;
         private readonly IJwtSettingsRepository _jwtSettingsRepository;
         private readonly IUserTokenRepository _userTokenRepository;
         private readonly SqlConnection _connection;
 
-        public LoginController(IUserRepository userRepository, IJwtSettingsRepository jwtSettingsRepository, IUserTokenRepository userTokenRepository, IConfiguration configuration)
+        public LoginController(ILoginRepository LoginRepository, IJwtSettingsRepository jwtSettingsRepository, IUserTokenRepository userTokenRepository, IConfiguration configuration)
         {
-            _userRepository = userRepository;
+            _loginRepository = LoginRepository;
             _jwtSettingsRepository = jwtSettingsRepository;
             _userTokenRepository = userTokenRepository;
             _connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
@@ -32,17 +32,18 @@ namespace Aligned.Controllers
         [HttpPost("login")]
         public async Task<JsonResult> Loginuser([FromBody] LoginModel loginModel)
         {
-            if (_userRepository.AuthenticateUser(loginModel.Email, loginModel.Password))
+            if (_loginRepository.AuthenticateUser(loginModel.Email, loginModel.Password))
             {
-                var user = _userRepository.GetUserByEmail(loginModel.Email);
-                var roles = _userRepository.GetUserRoles(user.Id);
+                var user = _loginRepository.GetUserByEmail(loginModel.Email);
+                var roles = _loginRepository.GetUserRoles(user.Id);
                 var jwtSettings = _jwtSettingsRepository.GetJwtSettings();
                 string token = Helper.GenerateJwtToken(jwtSettings.JwtIssuer, jwtSettings.JwtAudience, jwtSettings.JwtSigningSecret, loginModel.Email, Convert.ToInt64(jwtSettings.ExpiryToken), user.Id);
 
                 string ipAddress = Helper.GetClientIpAddress(HttpContext);
                 string browser = Request.Headers["User-Agent"].ToString();
                 string pcName = Dns.GetHostName();
-
+                DateTime Expiry = DateTime.Now.AddSeconds(Convert.ToInt64(jwtSettings.ExpiryToken));
+                string Refreshtoken = Helper.GenerateRefreshToken();
                 _userTokenRepository.DeleteOldUserTokens(user.Id);
 
                 var userToken = new UserToken
@@ -54,11 +55,13 @@ namespace Aligned.Controllers
                     CreatedAt = DateTime.UtcNow,
                     IpAddress = ipAddress,
                     Browser = browser,
-                    PcName = pcName
+                    PcName = pcName,
+                    Expiry=Expiry,
+                    Refreshtoken=Refreshtoken,
                 };
                 _userTokenRepository.InsertUserToken(userToken);
 
-                
+
                 var permissions = Helper.GetUserPermissions(_connection, user.Id);
 
                 return new JsonResult(new { statuscode = 200, success = true, roles, userToken, permissions });

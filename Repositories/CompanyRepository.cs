@@ -44,6 +44,13 @@ namespace Aligned.Repositories
             {
                 throw new Exception("An error occurred while creating the company.", ex);
             }
+            finally
+            {
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    _connection.Close();
+                }
+            }
         }
 
         public void UpdateCompany(Company company)
@@ -74,6 +81,13 @@ namespace Aligned.Repositories
             {
                 throw new Exception("An error occurred while updating the company.", ex);
             }
+            finally
+            {
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    _connection.Close();
+                }
+            }
         }
 
         public void DeleteCompany(Guid companyId)
@@ -93,6 +107,13 @@ namespace Aligned.Repositories
             catch (Exception ex)
             {
                 throw new Exception("An error occurred while deleting the company.", ex);
+            }
+            finally
+            {
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    _connection.Close();
+                }
             }
         }
 
@@ -133,6 +154,13 @@ namespace Aligned.Repositories
             catch (Exception ex)
             {
                 throw new Exception("An error occurred while retrieving the company.", ex);
+            }
+            finally
+            {
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    _connection.Close();
+                }
             }
 
             return company;
@@ -176,7 +204,13 @@ namespace Aligned.Repositories
             {
                 throw new Exception("An error occurred while retrieving the companies.", ex);
             }
-
+            finally
+            {
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    _connection.Close();
+                }
+            }
             return companies;
         }
     }

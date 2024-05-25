@@ -30,6 +30,8 @@ namespace Aligned.Repositories
                     command.Parameters.AddWithValue("@IpAddress", token.IpAddress);
                     command.Parameters.AddWithValue("@Browser", token.Browser);
                     command.Parameters.AddWithValue("@PcName", token.PcName);
+                    command.Parameters.AddWithValue("@RefreshToken", token.Refreshtoken);
+                    command.Parameters.AddWithValue("@Expiry", token.Expiry);
 
                     _connection.Open();
                     command.ExecuteNonQuery();

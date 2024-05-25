@@ -15,6 +15,8 @@ using System.Data;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Aligned.IRepositories;
+using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 public static class Helper
 {
@@ -231,10 +233,10 @@ public static class Helper
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("UserId", userId.ToString())
-        };
+        new Claim(JwtRegisteredClaimNames.Sub, email),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim("UserId", userId.ToString())
+    };
 
         var token = new JwtSecurityToken(
             issuer,
@@ -244,6 +246,24 @@ public static class Helper
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    public static string GenerateRefreshToken()
+    {
+        try
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+
+                return Convert.ToBase64String(randomNumber);
+            }
+        }
+        catch (Exception ex)
+        {
+
+            return "";
+        }
     }
 
     public static string GetTokenFromHeaders(HttpRequest request)
@@ -301,53 +321,86 @@ public static class Helper
         return Guid.Parse(userIdClaim?.Value);
     }
 
-    public static string RefreshToken(string expiredToken, SqlConnection connection, HttpContext context, IUserRepository userRepository, IJwtSettingsRepository jwtSettingsRepository)
-    {
-        var userId = GetUserIdFromToken(expiredToken);
-        var user = userRepository.GetUserById(userId);
+    //public static string RefreshToken(string expiredToken, string refreshToken, SqlConnection connection, HttpContext context, IUserRepository userRepository, IJwtSettingsRepository jwtSettingsRepository)
+    //{
+    //    var userId = GetUserIdFromToken(expiredToken);
+    //    var user = userRepository.GetUserById(userId);
 
-        if (user != null && AuthenticateUser(user.Email, user.Password, userRepository))
-        {
-            var jwtSettings = jwtSettingsRepository.GetJwtSettings();
-            return GenerateJwtToken(jwtSettings.JwtIssuer, jwtSettings.JwtAudience, jwtSettings.JwtSigningSecret, user.Email, Convert.ToInt64(jwtSettings.ExpiryToken), user.Id);
-        }
+    //    if (user != null)
+    //    {
+    //        using (var command = new SqlCommand("SELECT RefreshToken FROM UserToken WHERE UserId = @UserId AND Token = @Token", connection))
+    //        {
+    //            command.Parameters.AddWithValue("@UserId", userId);
+    //            command.Parameters.AddWithValue("@Token", expiredToken);
 
-        return null;
-    }
+    //            connection.Open();
+    //            var storedRefreshToken = command.ExecuteScalar()?.ToString();
+    //            connection.Close();
+
+    //            if (storedRefreshToken == refreshToken)
+    //            {
+    //                var jwtSettings = jwtSettingsRepository.GetJwtSettings();
+    //                var newToken = GenerateJwtToken(jwtSettings.JwtIssuer, jwtSettings.JwtAudience, jwtSettings.JwtSigningSecret, user.Email, Convert.ToInt64(jwtSettings.ExpiryToken), user.Id);
+
+    //                // Update the token and expiry in the database
+    //                var newExpiry = DateTime.Now.AddSeconds(Convert.ToDouble(jwtSettings.ExpiryToken));
+    //                var newRefreshToken = GenerateRefreshToken();
+
+    //                using (var updateCommand = new SqlCommand("UPDATE UserToken SET Token = @NewToken, Expiry = @NewExpiry, RefreshToken = @NewRefreshToken WHERE UserId = @UserId AND Token = @OldToken", connection))
+    //                {
+    //                    updateCommand.Parameters.AddWithValue("@NewToken", newToken);
+    //                    updateCommand.Parameters.AddWithValue("@NewExpiry", newExpiry);
+    //                    updateCommand.Parameters.AddWithValue("@NewRefreshToken", newRefreshToken);
+    //                    updateCommand.Parameters.AddWithValue("@UserId", userId);
+    //                    updateCommand.Parameters.AddWithValue("@OldToken", expiredToken);
+
+    //                    connection.Open();
+    //                    updateCommand.ExecuteNonQuery();
+    //                    connection.Close();
+    //                }
+
+    //                return newToken;
+    //            }
+    //        }
+    //    }
+
+    //    return null;
+    //}
 
 
 
-    private static bool AuthenticateUser(string email, string password, IUserRepository userRepository)
-    {
-        return userRepository.AuthenticateUser(email, password);
-    }
 
-    public static bool IsTokenExpired(string token, string signingSecret)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var validationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = false,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingSecret))
-        };
+    //private static bool AuthenticateUser(string email, string password, IUserRepository userRepository)
+    //{
+    //    return userRepository.AuthenticateUser(email, password);
+    //}
 
-        try
-        {
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out var securityToken);
-            if (securityToken is JwtSecurityToken jwtToken)
-            {
-                return jwtToken.ValidTo < DateTime.UtcNow;
-            }
-        }
-        catch (Exception)
-        {
-            return true;
-        }
+    //public static bool IsTokenExpired(string token, string signingSecret)
+    //{
+    //    var tokenHandler = new JwtSecurityTokenHandler();
+    //    var validationParameters = new TokenValidationParameters
+    //    {
+    //        ValidateIssuer = false,
+    //        ValidateAudience = false,
+    //        ValidateLifetime = false,
+    //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingSecret))
+    //    };
 
-        return false;
-    }
+    //    try
+    //    {
+    //        var principal = tokenHandler.ValidateToken(token, validationParameters, out var securityToken);
+    //        if (securityToken is JwtSecurityToken jwtToken)
+    //        {
+    //            return jwtToken.ValidTo < DateTime.UtcNow;
+    //        }
+    //    }
+    //    catch (Exception)
+    //    {
+    //        return true;
+    //    }
+
+    //    return false;
+    //}
 
     #endregion
 }

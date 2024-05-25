@@ -12,5 +12,8 @@ namespace Aligned.Models
         public string IpAddress { get; set; }
         public string Browser { get; set; }
         public string PcName { get; set; }
+        public DateTime Expiry { get; set; }
+        public string Refreshtoken { get; set; }
+
     }
 }
